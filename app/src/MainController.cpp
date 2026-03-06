@@ -43,8 +43,9 @@ static glm::vec3 moon_position = glm::vec3(-3.0f, 3.0f, -10.0f);
 // static glm::vec3 moon_position = glm::vec3(3.0f, 4.0f, -10.0f);
 static bool agent_alive = true;
 static bool pressedB = false;
+static bool BlinPhong = false;
 
-static glm::vec3 spotLightDiffuse_origin = glm::vec3(1.0f, 0.95f, 0.85f);
+// static glm::vec3 spotLightDiffuse_origin = glm::vec3(1.0f, 0.95f, 0.85f);
 
 void app::MainController::initialize() {
     spdlog::info("MainController initialized....");
@@ -73,6 +74,14 @@ bool app::MainController::loop() {
         } else {
             // spotLightDiffuse_origin = glm::vec3(1.0f, 0.95f, 0.85f);
             pressedB = false;
+        }
+    }
+
+    if (platform->key(engine::platform::KeyId::KEY_F).is_down()) {
+        if (!BlinPhong) {
+            BlinPhong = true;
+        } else {
+            BlinPhong = false;
         }
     }
 
@@ -217,6 +226,8 @@ void MainController::draw_agent() {
 
     // std::cout << "Agent Position: " << agent_position.x << " ; " << agent_position.y << " ; " << agent_position.z << "\n";
 
+    shader->set_float("material.shi", 64.0f);
+
     agent->draw(shader);
 }
 
@@ -235,11 +246,18 @@ void MainController::draw_moon() {
     float t = engine::core::Controller::get<engine::platform::PlatformController>()->frame_time().current;
 
     glm::mat4 M = glm::mat4(1.0f);
-    M = glm::translate(M, moon_position);
+    // M = glm::translate(M, moon_position);
+    // M = glm::scale(M, glm::vec3(0.085f));
+    // // M = glm::translate(M, glm::vec3(glm::cos(t)*50.0f, 0.0f, glm::sin(t)*50.0f));
+    // M = glm::rotate(M, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    // M = glm::rotate(M, glm::sin(t*0.5f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    M = glm::mat4(1.0f);
+    M = glm::translate(M, island_position);
+    M = glm::rotate(M, t * 0.3f, glm::vec3(0.0f, 1.0f, 0.0f));
+    M = glm::translate(M, glm::vec3(-3.0f, 2.5f, 0.0f));
+    M = glm::rotate(M, t * 0.5f, glm::vec3(0.0f, 1.0f, 0.0f));
     M = glm::scale(M, glm::vec3(0.085f));
-    // M = glm::translate(M, glm::vec3(glm::cos(t)*50.0f, 0.0f, glm::sin(t)*50.0f));
-    M = glm::rotate(M, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    M = glm::rotate(M, glm::sin(t*0.5f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     shader->set_mat4("M", M);
 
@@ -247,7 +265,7 @@ void MainController::draw_moon() {
 
     shader->set_vec3("spotLight.pos", ship_position);
     shader->set_vec3("spotLight.ambient", glm::vec3(0.0f));
-    shader->set_vec3("spotLight.diffuse", spotLightDiffuse_origin);
+    shader->set_vec3("spotLight.diffuse", glm::vec3(1.0f, 0.95f, 0.85f));
     shader->set_vec3("spotLight.specular", glm::vec3(1.0f));
     shader->set_vec3("spotLight.clq", glm::vec3(1.0f, 0.09f, 0.032f));
 
@@ -257,12 +275,13 @@ void MainController::draw_moon() {
 
     shader->set_float("material.shi", 32.0f);
 
-    shader->set_vec3("dirLight.dir", glm::normalize(island_position - moon_position));
+    shader->set_vec3("dirLight.dir", glm::vec3(100.0f, -100.0f, 0.0f));
     shader->set_vec3("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.5f));
-    shader->set_vec3("dirLight.diffuse", glm::vec3(4.0f, 4.0f, 5.0f)); // 0.8f
+    // shader->set_vec3("dirLight.diffuse", glm::vec3(4.0f, 4.0f, 5.0f)); // 0.8f
+    shader->set_vec3("dirLight.diffuse", glm::vec3(0.9f, 0.85f, 0.7f));
     shader->set_vec3("dirLight.specular", glm::vec3(0.3f));
 
-    shader->set_float("blin", false);
+    shader->set_float("blin", BlinPhong);
 
     moon->draw(shader);
 }
