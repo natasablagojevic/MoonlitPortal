@@ -45,7 +45,7 @@ using the left and right arrow keys to reach the portal.
 
 ### Engine improvement:
 
-[X] BloomController
+[X] Bloom 
 
 ## Models:
 

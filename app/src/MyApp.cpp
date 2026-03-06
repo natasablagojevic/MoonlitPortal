@@ -4,6 +4,7 @@
 
 #include <../include/MyApp.h>
 
+#include "GUIController.h"
 #include "MainController.h"
 #include <engine/graphics/BloomController.h>
 
@@ -16,9 +17,12 @@ void MyApp::app_setup() {
 
     auto mainController = register_controller<app::MainController>();
     auto bloomControler = register_controller<engine::graphics::BloomController>();
+    auto guiController = register_controller<app::GUIController>();
 
     mainController->after(engine::core::Controller::get<engine::core::EngineControllersEnd>());
     bloomControler->after(mainController);
+    guiController->after(mainController);
+    bloomControler->after(guiController);
 
 }
 
