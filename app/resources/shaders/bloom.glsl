@@ -36,8 +36,8 @@ void main()
         base += glow * bloomIntensity;
     }
 
-    vec3 toneMapped = vec3(1.0f) - exp(-base * exposure);
-    toneMapped = pow(toneMapped, vec3(1.0f / gamma));
+    vec3 result = vec3(1.0f) - exp(-base * exposure);
+    result = pow(result, vec3(1.0f / gamma));
 
-    FragColor = vec4(glow, 1.0);
+    FragColor = vec4(result, 1.0);
 }

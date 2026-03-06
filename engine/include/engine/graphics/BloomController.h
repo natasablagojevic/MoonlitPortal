@@ -13,6 +13,9 @@ namespace engine::graphics {
 
 class BloomController final : public core::Controller{
 public:
+    // BloomController() = default;
+    // ~BloomController();
+
     int bloom_passes = 8;
     float exposure = 1.1f;
     bool bloom = true;
@@ -31,14 +34,14 @@ public:
     void terminate() override;
 
 private:
-    unsigned m_pingpongFBO[2];
-    unsigned m_pingpongColorbuffers[2];
-    unsigned m_hdrFBO;
-    unsigned m_colorBuffers[2];
-    unsigned m_width;
-    unsigned m_height;
-    unsigned m_quadVAO;
-    unsigned m_quadVBO;
+    unsigned m_pingpongFBO[2] = {};
+    unsigned m_pingpongColorbuffers[2] = {};
+    unsigned m_hdrFBO = 0;
+    unsigned m_colorBuffers[2] = {};
+    unsigned m_width = 0;
+    unsigned m_height = 0;
+    unsigned m_quadVAO = 0;
+    unsigned m_quadVBO = 0;
 
     void render_quad();
 };

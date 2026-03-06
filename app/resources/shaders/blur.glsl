@@ -28,7 +28,7 @@ void main()
     vec2 texOff = 1.0 / vec2(textureSize(image, 0));
     vec3 result = texture(image, TexCoords).rgb * weight[0];
 
-    for (int i = 1;i < 5; i++) {
+    for (int i = 1; i < 5; ++i) {
         if (horizontal) {
             result += texture(image, TexCoords + vec2(texOff.x * i, 0.0f)).rgb * weight[i];
             result += texture(image, TexCoords - vec2(texOff.x * i, 0.0f)).rgb * weight[i];
@@ -37,6 +37,19 @@ void main()
             result += texture(image, TexCoords - vec2(0.0f, texOff.y * i)).rgb * weight[i];
         }
     }
+
+//    if (horizontal) {
+//        for (int i = 1; i < 5; ++i) {
+//            result += texture(image, TexCoords + vec2(texOff.x * i, 0.0f)).rgb * weight[i];
+//            result += texture(image, TexCoords - vec2(texOff.x * i, 0.0f)).rgb * weight[i];
+//        }
+//    } else {
+//        for (int i = 1; i < 5; ++i) {
+//            result += texture(image, TexCoords + vec2(0.0f, texOff.y * i)).rgb * weight[i];
+//            result += texture(image, TexCoords - vec2(0.0f, texOff.y * i)).rgb * weight[i];
+//        }
+//    }
+
 
     FragColor = vec4(result, 1.0f);
 
