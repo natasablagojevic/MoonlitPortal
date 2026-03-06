@@ -5,6 +5,8 @@
 #ifndef MATF_RG_PROJECT_MAINCONTROLLER_H
 #define MATF_RG_PROJECT_MAINCONTROLLER_H
 #include "engine/core/Controller.hpp"
+#include "engine/graphics/GraphicsController.hpp"
+#include <engine/graphics/BloomController.h>
 
 namespace app {
 
@@ -23,6 +25,8 @@ private:
     void draw_agent();
     void update_camera();
     void update_agent();
+
+    engine::graphics::BloomController *bloomControler;
 
 public:
     std::string_view name() const override;

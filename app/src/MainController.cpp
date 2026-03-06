@@ -32,19 +32,28 @@ void MainPlatformEventObserver::on_scroll(engine::platform::MousePosition positi
     camera->zoom(mouse.scroll);
     graphics->perspective_params().FOV = glm::radians(camera->Zoom);
 }
-
+// -3.0, 3.0, -10.0
 static glm::vec3 ship_position = glm::vec3(3.0f, 4.0f, -10.0f);
+// static glm::vec3 ship_position = glm::vec3(-3.0f, 3.0f, -10.0f);
 static glm::vec3 island_position = glm::vec3(0.0f, 0.0f, -10.0f);
 static glm::vec3 agent_position = glm::vec3(0.0f, 0.0f, -10.0f); // y = sint
 static glm::vec3 agent_position_origin = glm::vec3(0.0f, 0.0f, -10.0f);
+// 3.0, 4.0, -10.0
 static glm::vec3 moon_position = glm::vec3(-3.0f, 3.0f, -10.0f);
+// static glm::vec3 moon_position = glm::vec3(3.0f, 4.0f, -10.0f);
 static bool agent_alive = true;
+static bool pressedB = false;
+
+static glm::vec3 spotLightDiffuse_origin = glm::vec3(1.0f, 0.95f, 0.85f);
 
 void app::MainController::initialize() {
     spdlog::info("MainController initialized....");
 
     // auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     // platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
+
+    this->bloomControler = get<engine::graphics::BloomController>();
+    this->bloomControler->init();
 
     engine::graphics::OpenGL::enable_depth_testing();
 }
@@ -54,6 +63,17 @@ bool app::MainController::loop() {
 
     if (platform->key(engine::platform::KeyId::KEY_ESCAPE).is_down()) {
         return false;
+    }
+
+    if (platform->key(engine::platform::KeyId::KEY_B).is_down()) {
+        if (!pressedB) {
+            // spotLightDiffuse_origin = glm::vec3(10.0f);
+            this->bloomControler->toggle_bloom();
+            pressedB = true;
+        } else {
+            // spotLightDiffuse_origin = glm::vec3(1.0f, 0.95f, 0.85f);
+            pressedB = false;
+        }
     }
 
     return true;
@@ -227,19 +247,19 @@ void MainController::draw_moon() {
 
     shader->set_vec3("spotLight.pos", ship_position);
     shader->set_vec3("spotLight.ambient", glm::vec3(0.0f));
-    shader->set_vec3("spotLight.diffuse", glm::vec3(1.0f, 0.95f, 0.85f));
+    shader->set_vec3("spotLight.diffuse", spotLightDiffuse_origin);
     shader->set_vec3("spotLight.specular", glm::vec3(1.0f));
     shader->set_vec3("spotLight.clq", glm::vec3(1.0f, 0.09f, 0.032f));
 
-    shader->set_vec3("spotLight.direction", glm::normalize(island_position - ship_position));
+    shader->set_vec3("spotLight.direction", glm::normalize(agent_position - ship_position));
     shader->set_float("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
     shader->set_float("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
 
     shader->set_float("material.shi", 32.0f);
 
-    shader->set_vec3("dirLight.dir", glm::normalize(agent_position - moon_position));
+    shader->set_vec3("dirLight.dir", glm::normalize(island_position - moon_position));
     shader->set_vec3("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.5f));
-    shader->set_vec3("dirLight.diffuse", glm::vec3(1.2f));
+    shader->set_vec3("dirLight.diffuse", glm::vec3(4.0f, 4.0f, 5.0f)); // 0.8f
     shader->set_vec3("dirLight.specular", glm::vec3(0.3f));
 
     shader->set_float("blin", false);
@@ -257,6 +277,11 @@ void MainController::draw_skybox() {
 }
 
 void app::MainController::draw() {
+
+    if (pressedB) {
+        this->bloomControler->prepare_hdr();
+    }
+
     draw_ship();
     draw_island();
 
@@ -267,6 +292,11 @@ void app::MainController::draw() {
     draw_moon();
 
     draw_skybox();
+
+    if (pressedB) {
+        this->bloomControler->finalize();
+        // this->bloomControler->set_enable(!this->bloomControler->is_bloom_enabled());
+    }
 }
 
 void app::MainController::end_draw() {
