@@ -15,7 +15,7 @@ uniform mat4 P;
 
 void main() {
     FragPos = vec3(M * vec4(aPos, 1.0));
-    Normal = aNormal;
+    Normal = mat3(transpose(inverse(M))) * aNormal;
     TexCoords = vec2(aTexCoords.x, 1.0 - aTexCoords.y);
 
     gl_Position = P * V * M * vec4(aPos, 1.0);
@@ -25,7 +25,8 @@ void main() {
 
 #version  330 core
 
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
 
 in vec3 FragPos;
 in vec3 Normal;
@@ -69,6 +70,9 @@ uniform DirLight dirLight;
 uniform SpotLight spotLight;
 uniform Material material;
 uniform bool blin;
+
+uniform vec3 emissive;
+uniform float emissiveStrength;
 
 vec3 DirLightCalculation(DirLight light, vec3 normal, vec3 viewDir) {
     vec3 L = normalize(-light.dir);
@@ -126,5 +130,15 @@ void main() {
     vec3 result = DirLightCalculation(dirLight, N, V);
     result += SpotLightCalculation(spotLight, N, V, FragPos);
 
+    vec3 color = result + result * emissive * emissiveStrength;
+
     FragColor = vec4(result, 1.0);
+
+    float brightness = dot(color, vec3(0.2126f, 0.7152f, 0.0722f));
+
+    if (brightness > 1.0) {
+        BrightColor = vec4(color, 1.0f);
+    } else {
+        BrightColor = vec4(0.0f);
+    }
 }

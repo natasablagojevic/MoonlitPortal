@@ -31,8 +31,6 @@ void GUIController::draw() {
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     auto camera = graphics->camera();
     auto bloomController = engine::core::Controller::get<engine::graphics::BloomController>();
-
-
     graphics->begin_gui();
 
     ImGui::Begin("INFO");

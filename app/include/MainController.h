@@ -10,6 +10,11 @@
 
 namespace app {
 
+struct Brightness {
+    glm::vec3 emissive;
+    float emissiveStrength;
+};
+
 class MainController : public engine::core::Controller {
 private:
     void initialize() override;
@@ -25,12 +30,12 @@ private:
     void draw_agent();
     void update_camera();
     void update_agent();
+    void set_lights(engine::resources::Shader* shader);
 
     engine::graphics::BloomController *bloomControler;
 
 public:
     std::string_view name() const override;
-
 };
 
 }// namespace app
