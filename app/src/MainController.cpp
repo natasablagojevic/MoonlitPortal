@@ -65,6 +65,7 @@ void app::MainController::initialize() {
 
     this->bloomControler = get<engine::graphics::BloomController>();
     this->bloomControler->init();
+    this->bloomControler->set_bloom(false);
 
     engine::graphics::OpenGL::enable_depth_testing();
 }

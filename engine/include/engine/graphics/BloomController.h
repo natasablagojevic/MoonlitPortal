@@ -18,7 +18,7 @@ public:
 
     int bloom_passes = 8;
     float exposure = 1.1f;
-    bool bloom = true;
+    bool bloom = false;
     float bloom_intensity = 1.4f;
 
     void toggle_bloom();
