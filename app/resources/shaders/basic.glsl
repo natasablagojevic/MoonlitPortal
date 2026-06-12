@@ -83,7 +83,7 @@ vec3 DirLightCalculation(DirLight light, vec3 normal, vec3 viewDir) {
 
     if (blin) {
         vec3 H = normalize(L + viewDir);
-        spec = pow(max(dot(viewDir, H), 0.0f), material.shi);
+        spec = pow(max(dot(normal, H), 0.0f), material.shi);
     } else {
         spec = pow(max(dot(viewDir, R), 0.0f), material.shi);
     }
@@ -130,15 +130,15 @@ void main() {
     vec3 result = DirLightCalculation(dirLight, N, V);
     result += SpotLightCalculation(spotLight, N, V, FragPos);
 
-    vec3 color = result + result * emissive * emissiveStrength;
+    vec3 color = result + emissive * emissiveStrength;
 
     FragColor = vec4(result, 1.0);
 
     float brightness = dot(color, vec3(0.2126f, 0.7152f, 0.0722f));
 
-    if (brightness > 1.0) {
-        BrightColor = vec4(color, 1.0f);
+    if (brightness > 0.05) {
+        BrightColor = vec4(emissiveStrength * emissive, 1.0f);
     } else {
-        BrightColor = vec4(0.0f);
+        BrightColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     }
 }

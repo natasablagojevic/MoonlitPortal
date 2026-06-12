@@ -216,8 +216,8 @@ void MainController::draw_ship() {
 
     shader->set_float("material.shi", 96.0f);
 
-    shader->set_vec3("emissive", glm::vec3(0.35f, 0.45f, 0.75f));
-    shader->set_float("emissiveStrength", 0.6f);
+    shader->set_vec3("emissive", glm::vec3(0.30f, 0.45f, 0.80f));
+    shader->set_float("emissiveStrength", 0.25f);
 
     ship->draw(shader);
 }
@@ -280,7 +280,7 @@ void MainController::draw_agent() {
     shader->set_float("material.shi", 64.0f);
 
     shader->set_vec3("emissive", glm::vec3(0.0f, 0.45f, 0.55f));
-    shader->set_float("emissiveStrength", 0.8f);
+    shader->set_float("emissiveStrength", 0.5f);
 
     agent->draw(shader);
 }
@@ -317,13 +317,13 @@ void MainController::draw_moon() {
 
     auto camera = engine::core::Controller::get<engine::graphics::GraphicsController>()->camera();
 
-    shader->set_float("material.shi", 16.0f);
+    shader->set_float("material.shi", 8.0f);
 
 
     set_lights(shader);
 
-    shader->set_vec3("emissive", glm::vec3(0.5f, 0.5f, 0.55f));
-    shader->set_float("emissiveStrength", 0.8f);
+    shader->set_vec3("emissive", glm::vec3(0.4f, 0.4f, 0.52f));
+    shader->set_float("emissiveStrength", 0.55f);
 
     moon->draw(shader);
 }
