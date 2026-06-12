@@ -4,6 +4,7 @@
 
 #include "../include/MainController.h"
 
+#include "../../engine/libs/glfw/include/GLFW/glfw3.h"
 #include "engine/graphics/GraphicsController.hpp"
 #include "engine/graphics/OpenGL.hpp"
 #include "engine/platform/PlatformController.hpp"
@@ -42,6 +43,7 @@ static glm::vec3 agent_position_origin = glm::vec3(0.0f, 0.0f, -10.0f);
 static glm::vec3 moon_position = glm::vec3(-3.0f, 3.0f, -10.0f);
 // static glm::vec3 moon_position = glm::vec3(3.0f, 4.0f, -10.0f);
 static bool agent_alive = true;
+static bool bloomEnabled = false;
 static bool pressedB = false;
 static bool BlinPhong = false;
 
@@ -50,7 +52,7 @@ static bool BlinPhong = false;
 void app::MainController::initialize() {
     spdlog::info("MainController initialized....");
 
-    // auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+    auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     // platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
 
     this->bloomControler = get<engine::graphics::BloomController>();
@@ -150,6 +152,16 @@ void MainController::update_agent() {
 void MainController::update() {
     update_camera();
     update_agent();
+
+    auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+
+    bool bIsPressed = platform->key(engine::platform::KeyId::KEY_B).is_down();
+
+    if (bIsPressed && !pressedB) {
+        bloomEnabled = !bloomEnabled;
+        bloomControler->set_bloom(bloomEnabled);
+    }
+
 }
 
 void app::MainController::begin_draw() {
@@ -392,10 +404,8 @@ void app::MainController::draw() {
 
     draw_skybox();
 
-    if (pressedB) {
-        this->bloomControler->finalize();
-        // this->bloomControler->set_enable(!this->bloomControler->is_bloom_enabled());
-    }
+    this->bloomControler->finalize();
+
 }
 
 void app::MainController::end_draw() {

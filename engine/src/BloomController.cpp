@@ -7,6 +7,7 @@
 #include "engine/graphics/OpenGL.hpp"
 #include "engine/platform/PlatformController.hpp"
 #include "engine/resources/ResourcesController.hpp"
+#include "spdlog/spdlog.h"
 
 namespace engine::graphics {
 
@@ -47,11 +48,11 @@ void BloomController::init() {
         CHECKED_GL_CALL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, this->m_colorBuffers[i], 0);
     }
 
-    unsigned RBO;
-    CHECKED_GL_CALL(glGenRenderbuffers, 1, &RBO);
-    CHECKED_GL_CALL(glBindRenderbuffer, GL_RENDERBUFFER, RBO);
+
+    CHECKED_GL_CALL(glGenRenderbuffers, 1, &this->m_depthRBO);
+    CHECKED_GL_CALL(glBindRenderbuffer, GL_RENDERBUFFER, this->m_depthRBO);
     CHECKED_GL_CALL(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH_COMPONENT, this->m_width, this->m_height);
-    CHECKED_GL_CALL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, RBO);
+    CHECKED_GL_CALL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, this->m_depthRBO);
 
     unsigned attachments[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
     CHECKED_GL_CALL(glDrawBuffers, 2, attachments);
@@ -120,11 +121,16 @@ void BloomController::render() {
     }
 
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
-    // CHECKED_GL_CALL(glViewport, 0, 0, this->m_width, this->m_height);
+    CHECKED_GL_CALL(glViewport, 0, 0, this->m_width, this->m_height);
+    CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // final pass
 
     bloom_shader->use();
+
+    bloom_shader->set_int("Scene", 0);
+    bloom_shader->set_int("Blur", 1);
+
     bloom_shader->set_bool("useBloom", this->bloom);
     bloom_shader->set_float("bloomIntensity", this->bloom_intensity);
     bloom_shader->set_float("exposure", this->exposure);
@@ -137,12 +143,21 @@ void BloomController::render() {
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, this->m_pingpongColorbuffers[!horizontal]);
     // bloom_shader->set_int("Blur", 1);
 
+    CHECKED_GL_CALL(glDisable, GL_DEPTH_TEST);
     render_quad();
+    CHECKED_GL_CALL(glEnable, GL_DEPTH_TEST);
 }
 
 void BloomController::prepare_hdr() {
-    this->m_width = get<platform::PlatformController>()->window()->width();
-    this->m_height = get<platform::PlatformController>()->window()->height();
+    auto platform = get<platform::PlatformController>();
+
+    unsigned width = platform->window()->width();
+    unsigned height = platform->window()->height();
+
+    resize(width, height);
+
+    // this->m_width = get<platform::PlatformController>()->window()->width();
+    // this->m_height = get<platform::PlatformController>()->window()->height();
 
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, this->m_hdrFBO);
     CHECKED_GL_CALL(glViewport, 0, 0, this->m_width, this->m_height);
@@ -151,7 +166,56 @@ void BloomController::prepare_hdr() {
 
 void BloomController::finalize() {
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
+    CHECKED_GL_CALL(glViewport, 0, 0, this->m_width, this->m_height);
     render();
+}
+void BloomController::resize(int Width, int Height) {
+
+    if (Width == 0 || Height == 0) {
+        return ;
+    }
+
+    if (Width == this->m_width && Height == this->m_height) {
+        return ;
+    }
+
+    this->m_height = Height;
+    this->m_width =  Width;
+
+    // HDR : scene + bright
+    for (auto i = 0; i < 2; i++) {
+        CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, this->m_colorBuffers[i]);
+        CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, this->m_width, this->m_height, 0, GL_RGBA, GL_FLOAT, nullptr);
+    }
+
+    // Depth renderbuffer
+    CHECKED_GL_CALL(glBindRenderbuffer, GL_RENDERBUFFER, this->m_depthRBO);
+    CHECKED_GL_CALL(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH_COMPONENT, this->m_width, this->m_height);
+
+    // Ping-Pong blur textures
+    for (auto i = 0; i < 2; i++) {
+        CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, this->m_pingpongColorbuffers[i]);
+        CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, this->m_width, this->m_height, 0, GL_RGBA, GL_FLOAT, nullptr);
+    }
+
+    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, 0);
+    CHECKED_GL_CALL(glBindRenderbuffer, GL_RENDERBUFFER, 0);
+
+    // CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, this->m_colorBuffers[0]);
+    // CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, Width, Height, 0, GL_RGBA, GL_FLOAT, nullptr);
+    //
+    // CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, this->m_colorBuffers[1]);
+    // CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, Width, Height, 0, GL_RGBA, GL_FLOAT, nullptr);
+    //
+    // for (int i = 0; i < 2; i++) {
+    //     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, this->m_pingpongColorbuffers[i]);
+    //     CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, Width, Height, 0, GL_RGBA, GL_FLOAT, nullptr);
+    // }
+    //
+    // CHECKED_GL_CALL(glBindRenderbuffer, GL_RENDERBUFFER, this->m_depthRBO);
+    // CHECKED_GL_CALL(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH_COMPONENT, Width, Height);
+    //
+    // CHECKED_GL_CALL(glViewport, 0, 0, this->m_width, this->m_height);
 }
 
 std::string_view BloomController::name() const {
@@ -159,10 +223,17 @@ std::string_view BloomController::name() const {
 }
 
 void BloomController::terminate() {
-    CHECKED_GL_CALL(glDeleteBuffers, 1, &this->m_hdrFBO);
+    if (this->m_hdrFBO) {
+        CHECKED_GL_CALL(glDeleteFramebuffers, 1, &this->m_hdrFBO);
+    }
+
     CHECKED_GL_CALL(glDeleteFramebuffers, 2, this->m_pingpongFBO);
     CHECKED_GL_CALL(glDeleteTextures, 2, this->m_colorBuffers);
-    CHECKED_GL_CALL(glDeleteBuffers, 2, this->m_pingpongColorbuffers);
+    CHECKED_GL_CALL(glDeleteTextures, 2, this->m_pingpongColorbuffers);
+
+    if (this->m_depthRBO) {
+        CHECKED_GL_CALL(glDeleteRenderbuffers, 1, &this->m_depthRBO);
+    }
 
     if (this->m_quadVAO) {
         CHECKED_GL_CALL(glDeleteVertexArrays, 1, &this->m_quadVAO);

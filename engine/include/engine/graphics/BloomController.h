@@ -30,6 +30,8 @@ public:
     void prepare_hdr();
     void finalize();
 
+    void resize(int Width, int Height);
+
     std::string_view name() const override;
     void terminate() override;
 
@@ -42,6 +44,7 @@ private:
     unsigned m_height = 0;
     unsigned m_quadVAO = 0;
     unsigned m_quadVBO = 0;
+    unsigned m_depthRBO = 0;
 
     void render_quad();
 };
