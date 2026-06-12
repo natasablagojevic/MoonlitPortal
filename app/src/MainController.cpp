@@ -214,8 +214,10 @@ void MainController::draw_ship() {
 
     set_lights(shader);
 
-    shader->set_vec3("emissive", glm::vec3(0.19f));
-    shader->set_float("emissiveStrength", 0.5f);
+    shader->set_float("material.shi", 96.0f);
+
+    shader->set_vec3("emissive", glm::vec3(0.35f, 0.45f, 0.75f));
+    shader->set_float("emissiveStrength", 0.6f);
 
     ship->draw(shader);
 }
@@ -241,6 +243,8 @@ void MainController::draw_island() {
     shader->set_mat4("M", M);
 
     set_lights(shader);
+
+    shader->set_float("material.shi", 16.0f);
 
     shader->set_vec3("emissive", glm::vec3(0.0f));
     shader->set_float("emissiveStrength", 0.0f);
@@ -313,7 +317,7 @@ void MainController::draw_moon() {
 
     auto camera = engine::core::Controller::get<engine::graphics::GraphicsController>()->camera();
 
-    shader->set_float("material.shi", 64.0f);
+    shader->set_float("material.shi", 16.0f);
 
 
     set_lights(shader);
