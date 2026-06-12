@@ -38,14 +38,22 @@ static glm::vec3 ship_position = glm::vec3(2.8f, 3.2f, -9.5f);
 // static glm::vec3 ship_position = glm::vec3(-3.0f, 3.0f, -10.0f);
 static glm::vec3 island_position = glm::vec3(0.0f, 0.0f, -10.0f);
 static glm::vec3 agent_position = glm::vec3(0.0f, 0.0f, -8.7f); // y = sint
-static glm::vec3 agent_position_origin = glm::vec3(0.0f, 0.0f, -10.0f);
+static glm::vec3 agent_position_origin = glm::vec3(0.0f, 0.0f, -8.7f);
 // 3.0, 4.0, -10.0
 static glm::vec3 moon_position = glm::vec3(-3.0f, 3.0f, -10.0f);
 // static glm::vec3 moon_position = glm::vec3(3.0f, 4.0f, -10.0f);
+
 static bool agent_alive = true;
 static bool bloomEnabled = false;
 static bool pressedB = false;
 static bool BlinPhong = false;
+static bool pressedF = false;
+
+static bool pressedE = false;
+static bool eventActive = false;
+static float eventStartTime = 0.0f;
+static bool shipLightBoost = false;
+static bool agentGlowBoost = false;
 
 // static glm::vec3 spotLightDiffuse_origin = glm::vec3(1.0f, 0.95f, 0.85f);
 
@@ -79,13 +87,13 @@ bool app::MainController::loop() {
     //     }
     // }
 
-    if (platform->key(engine::platform::KeyId::KEY_F).is_down()) {
-        if (!BlinPhong) {
-            BlinPhong = true;
-        } else {
-            BlinPhong = false;
-        }
-    }
+    // if (platform->key(engine::platform::KeyId::KEY_F).is_down()) {
+    //     if (!BlinPhong) {
+    //         BlinPhong = true;
+    //     } else {
+    //         BlinPhong = false;
+    //     }
+    // }
 
     return true;
 }
@@ -146,6 +154,10 @@ void MainController::update_agent() {
     if (platform->key(engine::platform::KeyId::KEY_SPACE).is_down()) {
         agent_alive = true;
         agent_position = agent_position_origin;
+
+        eventActive = false;
+        shipLightBoost = false;
+        agentGlowBoost = false;
     }
 }
 
@@ -163,6 +175,46 @@ void MainController::update() {
     }
 
     pressedB = bIsPressed;
+
+    bool fIsPressed = platform->key(engine::platform::KeyId::KEY_F).is_down();
+
+    if (fIsPressed && !pressedF) {
+        BlinPhong = !BlinPhong;
+    }
+
+    pressedF = fIsPressed;
+
+    bool eIsPressed = platform->key(engine::platform::KeyId::KEY_E).is_down();
+
+    if (eIsPressed && !pressedE && agent_alive) {
+        eventActive = true;
+        eventStartTime = platform->frame_time().current;
+
+        shipLightBoost = false;
+        agentGlowBoost = false;
+    }
+
+    pressedE = eIsPressed;
+
+    if (eventActive) {
+        float esp = platform->frame_time().current - eventStartTime;
+
+        // after 2s
+        if (esp > 2.0f) {
+            shipLightBoost = true;
+        }
+
+        // after 4s
+        if (esp > 4.0f) {
+            agentGlowBoost = true;
+        }
+
+        // after 6s
+        if (esp > 6.0f) {
+            agent_alive = false;
+            eventActive = false;
+        }
+    }
 }
 
 void app::MainController::begin_draw() {
@@ -181,13 +233,18 @@ void MainController::set_lights(engine::resources::Shader* shader)
     shader->set_vec3("spotLight.direction", glm::normalize(agent_position - ship_position));
     shader->set_vec3("spotLight.clq", glm::vec3(1.0f, 0.045f, 0.0075f));
 
-    shader->set_float("spotLight.cutOff", glm::cos(glm::radians(13.0f)));
-    shader->set_float("spotLight.outerCutOff", glm::cos(glm::radians(19.0f)));
+    shader->set_float("spotLight.cutOff", glm::cos(glm::radians(12.0f)));
+    shader->set_float("spotLight.outerCutOff", glm::cos(glm::radians(17.0f)));
 
     shader->set_vec3("spotLight.ambient", glm::vec3(0.0f));
-    shader->set_vec3("spotLight.diffuse", glm::vec3(1.0f, 0.95f, 0.75f));
-    shader->set_vec3("spotLight.specular", glm::vec3(1.0f, 0.95f, 0.85f));
 
+    if (shipLightBoost) {
+        shader->set_vec3("spotLight.diffuse", glm::vec3(2.0f, 1.85f, 1.25f));
+        shader->set_vec3("spotLight.specular", glm::vec3(2.0f, 1.85f, 1.25f));
+    } else {
+        shader->set_vec3("spotLight.diffuse", glm::vec3(1.0f, 0.95f, 0.75f));
+        shader->set_vec3("spotLight.specular", glm::vec3(1.0f, 0.95f, 0.85f));
+    }
     shader->set_bool("blin", BlinPhong);
 }
 
@@ -279,9 +336,13 @@ void MainController::draw_agent() {
 
     shader->set_float("material.shi", 64.0f);
 
-    shader->set_vec3("emissive", glm::vec3(0.0f, 0.45f, 0.55f));
-    shader->set_float("emissiveStrength", 0.5f);
-
+    if (agentGlowBoost) {
+        shader->set_vec3("emissive", glm::vec3(0.0f, 0.75f, 0.95f));
+        shader->set_float("emissiveStrength", 1.2f);
+    } else {
+        shader->set_vec3("emissive", glm::vec3(0.0f, 0.45f, 0.55f));
+        shader->set_float("emissiveStrength", 0.5f);
+    }
     agent->draw(shader);
 }
 
@@ -309,9 +370,9 @@ void MainController::draw_moon() {
     M = glm::mat4(1.0f);
     M = glm::translate(M, island_position);
     M = glm::rotate(M, t * 0.3f, glm::vec3(0.0f, 1.0f, 0.0f));
-    M = glm::translate(M, glm::vec3(-3.0f, 2.5f, 0.0f));
+    M = glm::translate(M, glm::vec3(-3.0f, 4.7f, 0.0f));
     M = glm::rotate(M, t * 0.5f, glm::vec3(0.0f, 1.0f, 0.0f));
-    M = glm::scale(M, glm::vec3(0.12f));
+    M = glm::scale(M, glm::vec3(0.085f));
 
     shader->set_mat4("M", M);
 
