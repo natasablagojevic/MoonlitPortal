@@ -250,11 +250,11 @@ void BloomController::terminate() {
 void BloomController::render_quad() {
     if (this->m_quadVAO == 0) {
         float quadVertices[] = {
-            // positions         // texCoords
-            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-             1.0f, -1.0f, 0.0f, 1.0f, 0.0f
+            // positions           // texCoords
+            -1.0f,  1.0f, 0.0f,    0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f,    0.0f, 0.0f,
+             1.0f,  1.0f, 0.0f,    1.0f, 1.0f,
+             1.0f, -1.0f, 0.0f,    1.0f, 0.0f
             // -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
             // -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
             //  1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
@@ -271,11 +271,11 @@ void BloomController::render_quad() {
         CHECKED_GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, this->m_quadVBO);
         CHECKED_GL_CALL(glBufferData, GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 
-        CHECKED_GL_CALL(glEnableVertexAttribArray,0);
-        CHECKED_GL_CALL(glVertexAttribPointer,0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+        CHECKED_GL_CALL(glEnableVertexAttribArray, 0);
+        CHECKED_GL_CALL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
 
-        CHECKED_GL_CALL(glEnableVertexAttribArray,1);
-        CHECKED_GL_CALL(glVertexAttribPointer,1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+        CHECKED_GL_CALL(glEnableVertexAttribArray, 1);
+        CHECKED_GL_CALL(glVertexAttribPointer, 1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
     }
 
     CHECKED_GL_CALL(glBindVertexArray, this->m_quadVAO);

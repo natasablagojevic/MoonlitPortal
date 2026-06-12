@@ -68,16 +68,16 @@ bool app::MainController::loop() {
         return false;
     }
 
-    if (platform->key(engine::platform::KeyId::KEY_B).is_down()) {
-        if (!pressedB) {
-            // spotLightDiffuse_origin = glm::vec3(10.0f);
-            this->bloomControler->toggle_bloom();
-            pressedB = true;
-        } else {
-            // spotLightDiffuse_origin = glm::vec3(1.0f, 0.95f, 0.85f);
-            pressedB = false;
-        }
-    }
+    // if (platform->key(engine::platform::KeyId::KEY_B).is_down()) {
+    //     if (!pressedB) {
+    //         // spotLightDiffuse_origin = glm::vec3(10.0f);
+    //         this->bloomControler->toggle_bloom();
+    //         pressedB = true;
+    //     } else {
+    //         // spotLightDiffuse_origin = glm::vec3(1.0f, 0.95f, 0.85f);
+    //         pressedB = false;
+    //     }
+    // }
 
     if (platform->key(engine::platform::KeyId::KEY_F).is_down()) {
         if (!BlinPhong) {
@@ -159,9 +159,10 @@ void MainController::update() {
 
     if (bIsPressed && !pressedB) {
         bloomEnabled = !bloomEnabled;
-        bloomControler->set_bloom(bloomEnabled);
+        this->bloomControler->set_bloom(bloomEnabled);
     }
 
+    pressedB = bIsPressed;
 }
 
 void app::MainController::begin_draw() {
@@ -389,9 +390,7 @@ void MainController::draw_skybox() {
 
 void app::MainController::draw() {
 
-    if (pressedB) {
-        this->bloomControler->prepare_hdr();
-    }
+    this->bloomControler->prepare_hdr();
 
     draw_ship();
     draw_island();
