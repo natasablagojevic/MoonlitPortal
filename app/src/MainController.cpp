@@ -34,10 +34,10 @@ void MainPlatformEventObserver::on_scroll(engine::platform::MousePosition positi
     graphics->perspective_params().FOV = glm::radians(camera->Zoom);
 }
 // -3.0, 3.0, -10.0
-static glm::vec3 ship_position = glm::vec3(3.0f, 4.0f, -10.0f);
+static glm::vec3 ship_position = glm::vec3(2.8f, 3.2f, -9.5f);
 // static glm::vec3 ship_position = glm::vec3(-3.0f, 3.0f, -10.0f);
 static glm::vec3 island_position = glm::vec3(0.0f, 0.0f, -10.0f);
-static glm::vec3 agent_position = glm::vec3(0.0f, 0.0f, -10.0f); // y = sint
+static glm::vec3 agent_position = glm::vec3(0.0f, 0.0f, -8.7f); // y = sint
 static glm::vec3 agent_position_origin = glm::vec3(0.0f, 0.0f, -10.0f);
 // 3.0, 4.0, -10.0
 static glm::vec3 moon_position = glm::vec3(-3.0f, 3.0f, -10.0f);
@@ -171,22 +171,22 @@ void app::MainController::begin_draw() {
 
 void MainController::set_lights(engine::resources::Shader* shader)
 {
-    shader->set_vec3("dirLight.dir", glm::normalize(island_position - moon_position));
+    shader->set_vec3("dirLight.dir", glm::normalize(glm::vec3(-0.4f, -1.0f, -0.2f)));
     // shader->set_vec3("dirLight.dir", glm::vec3(0.1f, 0.02f, 0.5f));
     shader->set_vec3("dirLight.ambient", glm::vec3(0.06f, 0.06f, 0.1f));
-    shader->set_vec3("dirLight.diffuse", glm::vec3(0.35f, 0.38f, 0.55f));
-    shader->set_vec3("dirLight.specular", glm::vec3(0.4f));
+    shader->set_vec3("dirLight.diffuse", glm::vec3(0.30f, 0.34f, 0.48f));
+    shader->set_vec3("dirLight.specular", glm::vec3(0.25f, 0.25f, 0.35f));
 
     shader->set_vec3("spotLight.pos", ship_position);
     shader->set_vec3("spotLight.direction", glm::normalize(agent_position - ship_position));
-    shader->set_vec3("spotLight.clq", glm::vec3(1.0f, 0.07f, 0.017f));
+    shader->set_vec3("spotLight.clq", glm::vec3(1.0f, 0.045f, 0.0075f));
 
-    shader->set_float("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-    shader->set_float("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+    shader->set_float("spotLight.cutOff", glm::cos(glm::radians(13.0f)));
+    shader->set_float("spotLight.outerCutOff", glm::cos(glm::radians(19.0f)));
 
-    shader->set_vec3("spotLight.ambient", glm::vec3(0.02f));
-    shader->set_vec3("spotLight.diffuse", glm::vec3(1.0f, 0.95f, 0.85f));
-    shader->set_vec3("spotLight.specular", glm::vec3(1.0f));
+    shader->set_vec3("spotLight.ambient", glm::vec3(0.0f));
+    shader->set_vec3("spotLight.diffuse", glm::vec3(1.0f, 0.95f, 0.75f));
+    shader->set_vec3("spotLight.specular", glm::vec3(1.0f, 0.95f, 0.85f));
 
     shader->set_bool("blin", BlinPhong);
 }
@@ -211,21 +211,6 @@ void MainController::draw_ship() {
     M = glm::rotate(M, glm::sin(t)*0.2f, glm::vec3(0.0f, 1.0f, 0.0f));
 
     shader->set_mat4("M", M);
-
-    // shader->set_vec3("spotLight.pos", ship_position);
-    // shader->set_vec3("spotLight.direction", glm::normalize(agent_position - ship_position));
-    // shader->set_vec3("spotLight.clq", glm::vec3(1.0f, 0.07f, 0.017f));
-    // shader->set_float("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-    // shader->set_float("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
-    //
-    // shader->set_vec3("spotLight.ambient", glm::vec3(0.05f, 0.05f, 0.09f));
-    // shader->set_vec3("spotLight.diffuse", glm::vec3(1.0f, 0.95f, 0.85f));
-    // shader->set_vec3("spotLight.specular", glm::vec3(1.0f));
-    //
-    // shader->set_vec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.09f));
-    // shader->set_vec3("dirLight.diffuse", glm::vec3(0.35f, 0.38f, 0.55f));
-    //
-    // shader->set_bool("blin", BlinPhong);
 
     set_lights(shader);
 
@@ -254,13 +239,6 @@ void MainController::draw_island() {
     M = glm::scale(M, glm::vec3(0.25f));
     M = glm::rotate(M, glm::abs(glm::sin(t * 0.5f)*0.1f), glm::vec3(0.0f, 1.0f, 0.0f));
     shader->set_mat4("M", M);
-
-    // shader->set_vec3("dirLight.ambient", glm::vec3(0.07f, 0.07f, 0.11f));
-    // shader->set_vec3("dirLight.diffuse", glm::vec3(0.28f, 0.3f, 0.45f));
-    //
-    // shader->set_vec3("spotLight.diffuse", glm::vec3(0.8f, 0.75f, 0.7f));
-    //
-    // shader->set_bool("blin", BlinPhong);
 
     set_lights(shader);
 
@@ -293,22 +271,12 @@ void MainController::draw_agent() {
 
     // std::cout << "Agent Position: " << agent_position.x << " ; " << agent_position.y << " ; " << agent_position.z << "\n";
 
-    // shader->set_vec3("dirLight.dir", glm::vec3(glm::normalize(agent_position - moon_position)));
-    // shader->set_vec3("dirLight.ambient", glm::vec3(0.03f, 0.03f, 0.1f));
-    // shader->set_vec3("dirLight.diffuse", glm::vec3(0.35f, 0.35f, 0.55f));
-    //
-    // shader->set_vec3("spotLight.diffuse", glm::vec3(1.2f, 1.1f, 1.0f));
-    //
-    // shader->set_bool("blin", BlinPhong);
-
     set_lights(shader);
 
     shader->set_float("material.shi", 64.0f);
-    // shader->set_vec3("emissive", glm::vec3(0.6f, 0.7f, 1.0f)); // 0.7f, 0.8f, 1.0f
-    // shader->set_float("emissiveStrength", 2.5f); // 4.0f
 
-    shader->set_vec3("emissive", glm::vec3(0.3f, 0.5f, 0.8f));
-    shader->set_float("emissiveStrength", 1.2f);
+    shader->set_vec3("emissive", glm::vec3(0.0f, 0.45f, 0.55f));
+    shader->set_float("emissiveStrength", 0.8f);
 
     agent->draw(shader);
 }
@@ -345,31 +313,8 @@ void MainController::draw_moon() {
 
     auto camera = engine::core::Controller::get<engine::graphics::GraphicsController>()->camera();
 
-    // shader->set_vec3("spotLight.pos", ship_position);
-    // shader->set_vec3("spotLight.ambient", glm::vec3(0.0f));
-    // shader->set_vec3("spotLight.diffuse", glm::vec3(1.0f, 0.95f, 0.85f));
-    // shader->set_vec3("spotLight.specular", glm::vec3(1.0f));
-    // shader->set_vec3("spotLight.clq", glm::vec3(1.0f, 0.09f, 0.032f));
-    //
-    // shader->set_vec3("spotLight.direction", glm::normalize(agent_position - ship_position));
-    // shader->set_float("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-    // shader->set_float("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
-
     shader->set_float("material.shi", 64.0f);
 
-    // shader->set_vec3("dirLight.dir", glm::vec3(100.0f, -100.0f, 0.0f));
-    // shader->set_vec3("dirLight.ambient", glm::vec3(0.05f));
-    // // shader->set_vec3("dirLight.diffuse", glm::vec3(4.0f, 4.0f, 5.0f)); // 0.8f
-    // // shader->set_vec3("dirLight.diffuse", glm::vec3(0.9f, 0.85f, 0.7f));
-    // shader->set_vec3("dirLight.diffuse", glm::vec3(0.4f, 0.45f, 0.6f));
-    // shader->set_vec3("dirLight.specular", glm::vec3(0.3f));
-    //
-    // shader->set_vec3("dirLight.dir", glm::vec3(100.0f, -100.0f, 0.0f));
-    // shader->set_vec3("dirLight.ambient", glm::vec3(0.75f, 0.75f, 0.8f));
-    // shader->set_vec3("dirLight.diffuse", glm::vec3(0.6f, 0.6f, 0.8f));
-    // shader->set_vec3("dirLight.specular", glm::vec3(0.4f));
-    //
-    // shader->set_float("blin", BlinPhong);
 
     set_lights(shader);
 
