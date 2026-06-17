@@ -52,7 +52,7 @@ glowing more strongly. After 6 seconds, the agent disappears, simulating telepor
 
 ### Group A:
 
-[X] Frame-buffers with post-processing   
+[ ] Frame-buffers with post-processing   
 [ ] Off-screen Anti-Aliasing  
 [ ] Parallax Mapping   
 [X] Bloom with the use of HDR
