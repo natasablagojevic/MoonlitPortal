@@ -23,7 +23,7 @@ void GUIController::initialize() {
 void GUIController::poll_events() {
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
 
-    if (platform->key(engine::platform::KeyId::KEY_K).state() == engine::platform::Key::State::JustPressed) {
+    if (platform->key(engine::platform::KeyId::KEY_F2).state() == engine::platform::Key::State::JustPressed) {
         set_enable(!is_enabled());
     }
 }
