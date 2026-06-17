@@ -52,6 +52,8 @@ static bool eventActive = false;
 static float eventStartTime = 0.0f;
 static bool shipLightBoost = false;
 static bool agentGlowBoost = false;
+static glm::vec3 eventAgentStartPosition;
+static glm::vec3 portalTargetPosition = glm::vec3(0.0f, 0.0f,  -11.0f);
 
 
 void app::MainController::initialize() {
@@ -115,6 +117,19 @@ void MainController::update_agent() {
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
 
+    if (platform->key(engine::platform::KeyId::KEY_SPACE).is_down()) {
+        agent_alive = true;
+        agent_position = agent_position_origin;
+
+        eventActive = false;
+        shipLightBoost = false;
+        agentGlowBoost = false;
+    }
+
+    if (eventActive) {
+        return ;
+    }
+
     float dt = platform->dt();
     float speed = 0.5f;
 
@@ -128,15 +143,6 @@ void MainController::update_agent() {
 
     if (agent_position.z <= -11.3f) {
         agent_alive = false;
-    }
-
-    if (platform->key(engine::platform::KeyId::KEY_SPACE).is_down()) {
-        agent_alive = true;
-        agent_position = agent_position_origin;
-
-        eventActive = false;
-        shipLightBoost = false;
-        agentGlowBoost = false;
     }
 }
 
@@ -168,6 +174,8 @@ void MainController::handleKeyE(engine::platform::PlatformController* platform) 
         eventActive = true;
         eventStartTime = platform->frame_time().current;
 
+        eventAgentStartPosition = agent_position;
+
         shipLightBoost = false;
         agentGlowBoost = false;
     }
@@ -179,6 +187,17 @@ void MainController::handleEvent(engine::platform::PlatformController* platform)
 
     if (eventActive) {
         float esp = platform->frame_time().current - eventStartTime;
+        float move = esp / 4.0f;
+
+        if (move < 0.0f) {
+            move = 0.0f;
+        }
+
+        if (move > 1.0f) {
+            move = 1.0f;
+        }
+
+        agent_position = eventAgentStartPosition + (portalTargetPosition - eventAgentStartPosition) * move;
 
         // after 2s
         if (esp > 2.0f) {
