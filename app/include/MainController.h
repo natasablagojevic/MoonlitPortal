@@ -7,6 +7,7 @@
 #include "engine/core/Controller.hpp"
 #include "engine/graphics/GraphicsController.hpp"
 #include <engine/graphics/BloomController.h>
+#include <engine/platform/PlatformController.hpp>
 
 namespace app {
 
@@ -23,14 +24,21 @@ private:
     void begin_draw() override;
     void draw() override;
     void end_draw() override;
+
     void draw_moon();
     void draw_island();
     void draw_ship();
     void draw_skybox();
     void draw_agent();
+
     void update_camera();
     void update_agent();
+
     void set_lights(engine::resources::Shader* shader);
+    void handleKeyB(engine::platform::PlatformController* platform);
+    void handleKeyF(engine::platform::PlatformController* platform);
+    void handleKeyE(engine::platform::PlatformController* platform);
+    void handleEvent(engine::platform::PlatformController* platform);
 
     engine::graphics::BloomController *bloomControler;
 

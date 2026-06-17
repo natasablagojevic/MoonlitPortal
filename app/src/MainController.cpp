@@ -35,13 +35,10 @@ void MainPlatformEventObserver::on_scroll(engine::platform::MousePosition positi
 }
 // -3.0, 3.0, -10.0
 static glm::vec3 ship_position = glm::vec3(2.8f, 3.2f, -9.5f);
-// static glm::vec3 ship_position = glm::vec3(-3.0f, 3.0f, -10.0f);
 static glm::vec3 island_position = glm::vec3(0.0f, 0.0f, -10.0f);
 static glm::vec3 agent_position = glm::vec3(0.0f, 0.0f, -8.7f); // y = sint
 static glm::vec3 agent_position_origin = glm::vec3(0.0f, 0.0f, -8.7f);
-// 3.0, 4.0, -10.0
 static glm::vec3 moon_position = glm::vec3(-3.0f, 3.0f, -10.0f);
-// static glm::vec3 moon_position = glm::vec3(3.0f, 4.0f, -10.0f);
 
 static bool agent_alive = true;
 static bool bloomEnabled = false;
@@ -51,17 +48,17 @@ static bool pressedF = false;
 
 static bool pressedE = false;
 static bool eventActive = false;
+
 static float eventStartTime = 0.0f;
 static bool shipLightBoost = false;
 static bool agentGlowBoost = false;
 
-// static glm::vec3 spotLightDiffuse_origin = glm::vec3(1.0f, 0.95f, 0.85f);
 
 void app::MainController::initialize() {
     spdlog::info("MainController initialized....");
 
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
-    // platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
+    platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
 
     this->bloomControler = get<engine::graphics::BloomController>();
     this->bloomControler->init();
@@ -76,25 +73,6 @@ bool app::MainController::loop() {
     if (platform->key(engine::platform::KeyId::KEY_ESCAPE).is_down()) {
         return false;
     }
-
-    // if (platform->key(engine::platform::KeyId::KEY_B).is_down()) {
-    //     if (!pressedB) {
-    //         // spotLightDiffuse_origin = glm::vec3(10.0f);
-    //         this->bloomControler->toggle_bloom();
-    //         pressedB = true;
-    //     } else {
-    //         // spotLightDiffuse_origin = glm::vec3(1.0f, 0.95f, 0.85f);
-    //         pressedB = false;
-    //     }
-    // }
-
-    // if (platform->key(engine::platform::KeyId::KEY_F).is_down()) {
-    //     if (!BlinPhong) {
-    //         BlinPhong = true;
-    //     } else {
-    //         BlinPhong = false;
-    //     }
-    // }
 
     return true;
 }
@@ -162,12 +140,7 @@ void MainController::update_agent() {
     }
 }
 
-void MainController::update() {
-    update_camera();
-    update_agent();
-
-    auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
-
+void MainController::handleKeyB(engine::platform::PlatformController* platform) {
     bool bIsPressed = platform->key(engine::platform::KeyId::KEY_B).is_down();
 
     if (bIsPressed && !pressedB) {
@@ -176,7 +149,9 @@ void MainController::update() {
     }
 
     pressedB = bIsPressed;
+}
 
+void MainController::handleKeyF(engine::platform::PlatformController* platform) {
     bool fIsPressed = platform->key(engine::platform::KeyId::KEY_F).is_down();
 
     if (fIsPressed && !pressedF) {
@@ -184,7 +159,9 @@ void MainController::update() {
     }
 
     pressedF = fIsPressed;
+}
 
+void MainController::handleKeyE(engine::platform::PlatformController* platform) {
     bool eIsPressed = platform->key(engine::platform::KeyId::KEY_E).is_down();
 
     if (eIsPressed && !pressedE && agent_alive) {
@@ -196,6 +173,9 @@ void MainController::update() {
     }
 
     pressedE = eIsPressed;
+}
+
+void MainController::handleEvent(engine::platform::PlatformController* platform) {
 
     if (eventActive) {
         float esp = platform->frame_time().current - eventStartTime;
@@ -218,6 +198,18 @@ void MainController::update() {
     }
 }
 
+void MainController::update() {
+    update_camera();
+    update_agent();
+
+    auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+
+    handleKeyB(platform);
+    handleKeyF(platform);
+    handleKeyE(platform);
+    handleEvent(platform);
+}
+
 void app::MainController::begin_draw() {
     engine::graphics::OpenGL::clear_buffers();
 }
@@ -225,7 +217,6 @@ void app::MainController::begin_draw() {
 void MainController::set_lights(engine::resources::Shader* shader)
 {
     shader->set_vec3("dirLight.dir", glm::normalize(glm::vec3(-0.4f, -1.0f, -0.2f)));
-    // shader->set_vec3("dirLight.dir", glm::vec3(0.1f, 0.02f, 0.5f));
     shader->set_vec3("dirLight.ambient", glm::vec3(0.06f, 0.06f, 0.1f));
     shader->set_vec3("dirLight.diffuse", glm::vec3(0.30f, 0.34f, 0.48f));
     shader->set_vec3("dirLight.specular", glm::vec3(0.25f, 0.25f, 0.35f));
@@ -331,8 +322,6 @@ void MainController::draw_agent() {
     M = glm::scale(M, glm::vec3(0.2f));
     shader->set_mat4("M", M);
 
-    // std::cout << "Agent Position: " << agent_position.x << " ; " << agent_position.y << " ; " << agent_position.z << "\n";
-
     set_lights(shader);
 
     shader->set_float("material.shi", 64.0f);
@@ -362,11 +351,6 @@ void MainController::draw_moon() {
     float t = engine::core::Controller::get<engine::platform::PlatformController>()->frame_time().current;
 
     glm::mat4 M = glm::mat4(1.0f);
-    // M = glm::translate(M, moon_position);
-    // M = glm::scale(M, glm::vec3(0.085f));
-    // // M = glm::translate(M, glm::vec3(glm::cos(t)*50.0f, 0.0f, glm::sin(t)*50.0f));
-    // M = glm::rotate(M, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    // M = glm::rotate(M, glm::sin(t*0.5f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     M = glm::mat4(1.0f);
     M = glm::translate(M, island_position);
@@ -380,7 +364,6 @@ void MainController::draw_moon() {
     auto camera = engine::core::Controller::get<engine::graphics::GraphicsController>()->camera();
 
     shader->set_float("material.shi", 8.0f);
-
 
     set_lights(shader);
 
@@ -415,7 +398,6 @@ void app::MainController::draw() {
     draw_skybox();
 
     this->bloomControler->finalize();
-
 }
 
 void app::MainController::end_draw() {
