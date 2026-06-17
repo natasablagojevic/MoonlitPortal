@@ -44,6 +44,7 @@ private:
 
 public:
     std::string_view name() const override;
+    float spotLightStrength = 1.0f;
 };
 
 }// namespace app

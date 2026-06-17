@@ -214,12 +214,19 @@ void app::MainController::begin_draw() {
     engine::graphics::OpenGL::clear_buffers();
 }
 
-void MainController::set_lights(engine::resources::Shader* shader)
-{
+void MainController::set_lights(engine::resources::Shader* shader) {
+
+    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+
+    shader->set_vec3("ViewPos", graphics->camera()->Position);
+
     shader->set_vec3("dirLight.dir", glm::normalize(glm::vec3(-0.4f, -1.0f, -0.2f)));
     shader->set_vec3("dirLight.ambient", glm::vec3(0.06f, 0.06f, 0.1f));
     shader->set_vec3("dirLight.diffuse", glm::vec3(0.30f, 0.34f, 0.48f));
     shader->set_vec3("dirLight.specular", glm::vec3(0.25f, 0.25f, 0.35f));
+
+    float boost = shipLightBoost ? 2.0f : 1.0f;
+    float finalSpotStrength = spotLightStrength * boost;
 
     shader->set_vec3("spotLight.pos", ship_position);
     shader->set_vec3("spotLight.direction", glm::normalize(agent_position - ship_position));
@@ -234,8 +241,8 @@ void MainController::set_lights(engine::resources::Shader* shader)
         shader->set_vec3("spotLight.diffuse", glm::vec3(2.0f, 1.85f, 1.25f));
         shader->set_vec3("spotLight.specular", glm::vec3(2.0f, 1.85f, 1.25f));
     } else {
-        shader->set_vec3("spotLight.diffuse", glm::vec3(1.0f, 0.95f, 0.75f));
-        shader->set_vec3("spotLight.specular", glm::vec3(1.0f, 0.95f, 0.85f));
+        shader->set_vec3("spotLight.diffuse", glm::vec3(1.0f, 0.95f, 0.75f) * finalSpotStrength);
+        shader->set_vec3("spotLight.specular", glm::vec3(1.0f, 0.95f, 0.85f) * finalSpotStrength);
     }
     shader->set_bool("blin", BlinPhong);
 }

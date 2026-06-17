@@ -33,7 +33,7 @@ public:
     void resize(int Width, int Height);
 
     std::string_view name() const override;
-    void terminate() override;
+    void terminate() override;void camera();
 
 private:
     unsigned m_pingpongFBO[2] = {};

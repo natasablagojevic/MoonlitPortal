@@ -4,6 +4,7 @@
 
 #include "../include/GUIController.h"
 
+#include "MainController.h"
 #include "engine/graphics/BloomController.h"
 #include "engine/graphics/GraphicsController.hpp"
 #include "engine/platform/PlatformController.hpp"
@@ -22,7 +23,7 @@ void GUIController::initialize() {
 void GUIController::poll_events() {
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
 
-    if (platform->key(engine::platform::KeyId::KEY_F2).state() == engine::platform::Key::State::JustPressed) {
+    if (platform->key(engine::platform::KeyId::KEY_K).state() == engine::platform::Key::State::JustPressed) {
         set_enable(!is_enabled());
     }
 }
@@ -31,6 +32,8 @@ void GUIController::draw() {
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     auto camera = graphics->camera();
     auto bloomController = engine::core::Controller::get<engine::graphics::BloomController>();
+    auto mainController = engine::core::Controller::get<MainController>();
+
     graphics->begin_gui();
 
     ImGui::Begin("INFO");
@@ -40,6 +43,8 @@ void GUIController::draw() {
         ImGui::Text("LEFT - Agent moves left");
         ImGui::Text("F - BlinPhong light enabled");
         ImGui::Text("B - Bloom Effect");
+        ImGui::Text("E - Starts event sequence");
+        ImGui::Text("SPACE - Resets agent");
     }
 
     ImGui::Separator();
@@ -49,6 +54,12 @@ void GUIController::draw() {
         ImGui::Text("Camera position: (%.2f, %.2f, %.2f)", c.Position.x, c.Position.y, c.Position.z);
         ImGui::Text("(Yaw, Pitch): (%.2f, %.2f)", c.Yaw, c.Pitch);
         ImGui::Text("Camera front: (%.2f, %.2f, %.2f)", c.Front.x, c.Front.y, c.Front.z);
+    }
+
+    ImGui::Separator();
+
+    if (ImGui::CollapsingHeader("Spot Light Strength", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::SliderFloat("Spot light strength", &mainController->spotLightStrength, 0.2f, 3.0f);
     }
 
     ImGui::Separator();
