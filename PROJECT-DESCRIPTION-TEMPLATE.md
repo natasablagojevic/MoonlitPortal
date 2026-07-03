@@ -19,7 +19,7 @@ Bloom is used to emphasize glowing objects such as the moon, spaceship and agent
 `D` -> move right   
 `UP` -> move up  
 `DOWN` -> move down  
-`SCROOL` -> zoom in/out
+`SCROLL` -> zoom in/out
 <br> <br>
 `RIGHT` -> agent moves right  
 `LEFT` -> agent moves left     
@@ -78,4 +78,3 @@ glowing more strongly. After 6 seconds, the agent disappears, simulating telepor
 
 [Blue space skybox](https://opengameart.org/content/space-skyboxes-0)
 
-{OTHER-RESOURCES}
