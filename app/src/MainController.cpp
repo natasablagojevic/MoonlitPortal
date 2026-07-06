@@ -4,12 +4,10 @@
 
 #include "../include/MainController.h"
 
-#include "../../engine/libs/glfw/include/GLFW/glfw3.h"
 #include "engine/graphics/GraphicsController.hpp"
 #include "engine/graphics/OpenGL.hpp"
 #include "engine/platform/PlatformController.hpp"
 #include "engine/resources/ResourcesController.hpp"
-#include "imgui_impl_opengl3_loader.h"
 
 #include <iostream>
 #include <spdlog/spdlog.h>
@@ -33,28 +31,6 @@ void MainPlatformEventObserver::on_scroll(engine::platform::MousePosition positi
     camera->zoom(mouse.scroll);
     graphics->perspective_params().FOV = glm::radians(camera->Zoom);
 }
-// -3.0, 3.0, -10.0
-static glm::vec3 ship_position = glm::vec3(2.8f, 3.2f, -9.5f);
-static glm::vec3 island_position = glm::vec3(0.0f, 0.0f, -10.0f);
-static glm::vec3 agent_position = glm::vec3(0.0f, 0.0f, -8.7f); // y = sint
-static glm::vec3 agent_position_origin = glm::vec3(0.0f, 0.0f, -8.7f);
-static glm::vec3 moon_position = glm::vec3(-3.0f, 3.0f, -10.0f);
-
-static bool agent_alive = true;
-static bool bloomEnabled = false;
-static bool pressedB = false;
-static bool BlinPhong = false;
-static bool pressedF = false;
-
-static bool pressedE = false;
-static bool eventActive = false;
-
-static float eventStartTime = 0.0f;
-static bool shipLightBoost = false;
-static bool agentGlowBoost = false;
-static glm::vec3 eventAgentStartPosition;
-static glm::vec3 portalTargetPosition = glm::vec3(0.0f, 0.0f,  -11.0f);
-
 
 void app::MainController::initialize() {
     spdlog::info("MainController initialized....");
@@ -62,9 +38,9 @@ void app::MainController::initialize() {
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
 
-    this->bloomControler = get<engine::graphics::BloomController>();
-    this->bloomControler->init();
-    this->bloomControler->set_bloom(false);
+    this-> bloomController = get<engine::graphics::BloomController>();
+    this-> bloomController->init();
+    this-> bloomController->set_bloom(false);
 
     engine::graphics::OpenGL::enable_depth_testing();
 }
@@ -146,31 +122,19 @@ void MainController::update_agent() {
     }
 }
 
-void MainController::handleKeyB(engine::platform::PlatformController* platform) {
-    bool bIsPressed = platform->key(engine::platform::KeyId::KEY_B).is_down();
+void MainController::handle_key() {
+    auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
 
-    if (bIsPressed && !pressedB) {
+    if (platform->key(engine::platform::KeyId::KEY_B).state() == engine::platform::Key::State::JustPressed) {
         bloomEnabled = !bloomEnabled;
-        this->bloomControler->set_bloom(bloomEnabled);
+        this->bloomController->set_bloom(bloomEnabled);
     }
 
-    pressedB = bIsPressed;
-}
-
-void MainController::handleKeyF(engine::platform::PlatformController* platform) {
-    bool fIsPressed = platform->key(engine::platform::KeyId::KEY_F).is_down();
-
-    if (fIsPressed && !pressedF) {
+    if (platform->key(engine::platform::KeyId::KEY_F).state() == engine::platform::Key::State::JustPressed) {
         BlinPhong = !BlinPhong;
     }
 
-    pressedF = fIsPressed;
-}
-
-void MainController::handleKeyE(engine::platform::PlatformController* platform) {
-    bool eIsPressed = platform->key(engine::platform::KeyId::KEY_E).is_down();
-
-    if (eIsPressed && !pressedE && agent_alive) {
+    if (platform->key(engine::platform::KeyId::KEY_E).state() == engine::platform::Key::State::JustPressed) {
         eventActive = true;
         eventStartTime = platform->frame_time().current;
 
@@ -179,8 +143,6 @@ void MainController::handleKeyE(engine::platform::PlatformController* platform) 
         shipLightBoost = false;
         agentGlowBoost = false;
     }
-
-    pressedE = eIsPressed;
 }
 
 void MainController::handleEvent(engine::platform::PlatformController* platform) {
@@ -223,9 +185,7 @@ void MainController::update() {
 
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
 
-    handleKeyB(platform);
-    handleKeyF(platform);
-    handleKeyE(platform);
+    handle_key();
     handleEvent(platform);
 }
 
@@ -410,7 +370,7 @@ void MainController::draw_skybox() {
 
 void app::MainController::draw() {
 
-    this->bloomControler->prepare_hdr();
+    this-> bloomController->prepare_hdr();
 
     draw_ship();
     draw_island();
@@ -423,7 +383,7 @@ void app::MainController::draw() {
 
     draw_skybox();
 
-    this->bloomControler->finalize();
+    this-> bloomController->finalize();
 }
 
 void app::MainController::end_draw() {
