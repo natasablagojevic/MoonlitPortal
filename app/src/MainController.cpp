@@ -2,7 +2,7 @@
 // Created by natasa on 2/22/26.
 //
 
-#include "../include/MainController.h"
+#include "MainController.h"
 
 #include "engine/graphics/GraphicsController.hpp"
 #include "engine/graphics/OpenGL.hpp"
