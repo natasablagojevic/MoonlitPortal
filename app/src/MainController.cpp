@@ -39,8 +39,6 @@ void app::MainController::initialize() {
     platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
 
     this-> bloomController = get<engine::graphics::BloomController>();
-    // this-> bloomController->init();
-    // this-> bloomController->set_bloom(false);
 
     engine::graphics::OpenGL::enable_depth_testing();
 }

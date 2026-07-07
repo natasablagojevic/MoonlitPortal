@@ -12,10 +12,6 @@
 
 namespace engine::graphics {
 
-// BloomController::~BloomController() {
-//     terminate();
-// }
-
 void BloomController::toggle_bloom() {
     this->bloom = !this->bloom;
 }

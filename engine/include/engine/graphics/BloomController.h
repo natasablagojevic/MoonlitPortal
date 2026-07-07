@@ -10,8 +10,6 @@ namespace engine::graphics {
 
 class BloomController final : public core::Controller{
 public:
-    // BloomController() = default;
-    // ~BloomController();
 
     int bloom_passes = 8;
     float exposure = 1.1f;
@@ -30,7 +28,7 @@ public:
     void resize(int Width, int Height);
 
     std::string_view name() const override;
-    void terminate() override;void camera();
+    void terminate() override;
 
 private:
     unsigned m_pingpongFBO[2] = {};
