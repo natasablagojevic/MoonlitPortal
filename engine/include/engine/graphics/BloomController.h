@@ -6,9 +6,6 @@
 #define MATF_RG_PROJECT_BLOOMCONTROLLER_H
 #include "engine/core/Controller.hpp"
 
-
-#include <glad/glad.h>
-
 namespace engine::graphics {
 
 class BloomController final : public core::Controller{
@@ -25,7 +22,7 @@ public:
     void set_bloom(bool enabled);
     bool is_bloom_enabled() const;
 
-    void init();
+    void initialize() override;
     void render();
     void prepare_hdr();
     void finalize();

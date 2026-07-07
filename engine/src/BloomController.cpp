@@ -8,6 +8,7 @@
 #include "engine/platform/PlatformController.hpp"
 #include "engine/resources/ResourcesController.hpp"
 #include "spdlog/spdlog.h"
+#include <glad/glad.h>
 
 namespace engine::graphics {
 
@@ -27,7 +28,11 @@ bool BloomController::is_bloom_enabled() const {
     return this->bloom;
 }
 
-void BloomController::init() {
+void BloomController::initialize() {
+    spdlog::info("BloomController initialized...");
+
+    this->bloom = false;
+
     CHECKED_GL_CALL(glGenFramebuffers, 1, &this->m_hdrFBO);
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, this->m_hdrFBO);
 
