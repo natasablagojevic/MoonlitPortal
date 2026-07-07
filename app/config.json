@@ -1,11 +1,23 @@
 {
   "resources": {
     "models": {
+      "agent": {
+        "path": "agent/agent2.obj"
+      },
+      "space_island": {
+        "path": "space_island/space_island.obj"
+      },
+      "space_ship": {
+        "path": "space_ship/space_ship.obj"
+      },
+      "moon": {
+        "path": "moon/moon.obj"
+      }
     }
   },
   "window": {
     "height": 600,
-    "title": "Hello, window!",
+    "title": "Welcome to the space!",
     "width": 800
   }
 }

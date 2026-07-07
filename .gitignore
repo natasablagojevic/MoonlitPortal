@@ -20,3 +20,7 @@ engine/test/app/test-app
 app/APP
 .venv
 engine/libs/glfw/src
+
+
+app/resources/models/moon/moon.obj
+app/resources/models/moon/*
