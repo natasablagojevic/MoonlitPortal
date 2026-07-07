@@ -31,5 +31,5 @@ add_library(${PROJECT_NAME} ${engine-sources} ${engine-headers}
         src/BloomController.cpp
         include/engine/graphics/BloomController.h)
 target_include_directories(${PROJECT_NAME} PUBLIC include/)
-target_link_libraries(${PROJECT_NAME} PUBLIC glad  PRIVATE glfw assimp ${ASSIMP_LIBRARIES} stb
+target_link_libraries(${PROJECT_NAME} PRIVATE glad  PRIVATE glfw assimp ${ASSIMP_LIBRARIES} stb
         PUBLIC glm::glm-header-only spdlog::spdlog imgui json)
